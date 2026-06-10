@@ -1,5 +1,6 @@
 const STORAGE_KEY = "tiny-town-adventure-v1";
 const WS_URL_STORAGE_KEY = "tiny-town-ws-url";
+const VOICE_ENABLED_KEY = "tiny-town-voice-enabled";
 const WORLD_W = 16;
 const WORLD_H = 10;
 const TILE = 48;
@@ -224,7 +225,12 @@ const elements = {
   overlayOptions: document.getElementById("questOptions"),
   nameModal: document.getElementById("nameModal"),
   nameInput: document.getElementById("nameInput"),
-  startBtn: document.getElementById("startBtn")
+  startBtn: document.getElementById("startBtn"),
+  voiceToggle: document.getElementById("voiceToggle"),
+  testVoiceBtn: document.getElementById("testVoiceBtn"),
+  questVoiceControls: document.getElementById("questVoiceControls"),
+  replayVoiceBtn: document.getElementById("replayVoiceBtn"),
+  stopVoiceBtn: document.getElementById("stopVoiceBtn")
 };
 
 elements.ctx = elements.canvas.getContext("2d");
@@ -254,6 +260,62 @@ let wsConnected = false;
 let canMove = true;
 let lastMoveAt = 0;
 const moveDelay = 110;
+let speechEnabled = true;
+let hasInteracted = false;
+let currentQuestSpeechText = "";
+
+function isSpeechAvailable() {
+  return typeof speechSynthesis !== "undefined" && typeof speechSynthesis.speak === "function";
+}
+
+function getStorySpeechText(stateText) {
+  return `任務訊息：${stateText}`;
+}
+
+function setSpeechEnabled(next) {
+  speechEnabled = Boolean(next);
+  localStorage.setItem(VOICE_ENABLED_KEY, speechEnabled ? "1" : "0");
+  if (!speechEnabled) stopSpeech();
+}
+
+function stopSpeech() {
+  if (isSpeechAvailable()) {
+    speechSynthesis.cancel();
+  }
+}
+
+function normalizeSpeakText(value) {
+  return String(value || "").replace(/\s+/g, " ").replace(/[_*#]/g, " ").trim();
+}
+
+function safeSpeak(text, force = false) {
+  if (!force && !speechEnabled) return;
+  if (!hasInteracted && !force) return;
+  const clean = normalizeSpeakText(text);
+  if (!clean || !isSpeechAvailable()) return;
+
+  stopSpeech();
+  currentQuestSpeechText = clean;
+  const utter = new SpeechSynthesisUtterance(clean);
+  utter.lang = "zh-TW";
+  utter.rate = 1;
+  utter.pitch = 1;
+  utter.volume = 1;
+  speechSynthesis.speak(utter);
+}
+
+function speakQuestText(quest) {
+  const prompt = `任務名稱：${quest.name}，難度${quest.difficulty}。${quest.prompt}。選項如下：`;
+  const options = (quest.options || []).map((opt, idx) => `第${idx + 1}題，${opt}`).join("。");
+  safeSpeak(`${prompt} ${options}`);
+}
+
+function setQuestSpeechText(value) {
+  currentQuestSpeechText = normalizeSpeakText(value);
+  if (elements.replayVoiceBtn) {
+    elements.replayVoiceBtn.disabled = currentQuestSpeechText.length === 0;
+  }
+}
 
 function syncWsUrl() {
   const queryUrl = new URLSearchParams(window.location.search).get("ws");
@@ -341,15 +403,18 @@ function missingItems(q) {
 }
 
 function updateStoryText() {
+  let storyText;
   if (completeCount() >= 9) {
-    elements.storyText.textContent = "你已完成所有任務，鄰里變得更有秩序，獲得「小小探索家」稱號！";
+    storyText = "你已完成所有任務，鄰里變得更有秩序，獲得「小小探索家」稱號！";
   } else if (completeCount() >= 6) {
-    elements.storyText.textContent = "你已幫助六位居民，夜晚也開始安全回歸，繼續往前探索。";
+    storyText = "你已幫助六位居民，夜晚也開始安全回歸，繼續往前探索。";
   } else if (completeCount() >= 3) {
-    elements.storyText.textContent = "你已解開三道日常謎題，村長準備了新的活動道具給你。";
+    storyText = "你已解開三道日常謎題，村長準備了新的活動道具給你。";
   } else {
-    elements.storyText.textContent = "歡迎來到「幸福鎮」，完成各難度日常任務，帶回幫助與積分。";
+    storyText = "歡迎來到「幸福鎮」，完成各難度日常任務，帶回幫助與積分。";
   }
+  elements.storyText.textContent = storyText;
+  safeSpeak(getStorySpeechText(storyText), hasInteracted);
 }
 
 function clampInventoryLabel(id) {
@@ -533,15 +598,26 @@ function draw() {
 }
 
 function openQuest(quest) {
+  if (!quest) return;
   elements.overlayTitle.textContent = `${quest.name}（${quest.difficulty}）`;
   const missing = missingItems(quest);
   if (missing.length > 0) {
-    elements.overlayBody.textContent = `你還缺少 ${missing.map(clampInventoryLabel).join("、")}，先去商店買到再來吧。`;
+    const bodyText = `你還缺少 ${missing.map(clampInventoryLabel).join("、")}，先去商店買到再來吧。`;
+    elements.overlayBody.textContent = bodyText;
     elements.overlayOptions.innerHTML = "";
+    setQuestSpeechText(bodyText);
+    safeSpeak(bodyText);
+    elements.questVoiceControls.classList.remove("hidden");
+    elements.replayVoiceBtn.disabled = false;
     elements.overlay.classList.remove("hidden");
     return;
   }
   elements.overlayBody.textContent = quest.prompt;
+  const fullPrompt = `你到達任務「${quest.name}」，${quest.prompt}`;
+  setQuestSpeechText(fullPrompt);
+  speakQuestText(quest);
+  elements.questVoiceControls.classList.remove("hidden");
+  elements.replayVoiceBtn.disabled = false;
   elements.overlayOptions.innerHTML = "";
   quest.options.forEach((opt, idx) => {
     const btn = document.createElement("button");
@@ -569,9 +645,11 @@ function openQuest(quest) {
         renderInventory();
         renderQuestList();
         closeOverlay();
+        safeSpeak(`太棒了！${state.player.name}，你完成 ${quest.name} 任務，${quest.rewardText}`, true);
         maybeWin();
       } else {
         appendChat(`[系統] ${state.player.name} 沒有答對，先回去想一想。`);
+        safeSpeak("答案不對，請再想一想。", true);
         closeOverlay();
       }
     });
@@ -586,11 +664,20 @@ function openQuest(quest) {
 
 function closeOverlay() {
   elements.overlay.classList.add("hidden");
+  currentQuestSpeechText = "";
+  if (elements.questVoiceControls) {
+    elements.questVoiceControls.classList.add("hidden");
+  }
+  if (elements.replayVoiceBtn) {
+    elements.replayVoiceBtn.disabled = true;
+  }
 }
 
 function maybeWin() {
   if (completeCount() >= 9) {
-    appendChat("恭喜你完成全任務，全鎮發放「小小探索家榮耀獎」：新增 100 幣與獎勵外套。");
+    const winText = "恭喜你完成全任務，全鎮發放「小小探索家榮耀獎」：新增 100 幣與獎勵外套。";
+    appendChat(winText);
+    safeSpeak(winText, true);
     state.coins += 100;
     state.inventory["badge"] = (state.inventory["badge"] || 0) + 1;
     renderTopBar();
@@ -777,6 +864,37 @@ function loop() {
 }
 
 function wireControls() {
+  const storedVoiceEnabled = localStorage.getItem(VOICE_ENABLED_KEY);
+  const shouldEnableVoice = storedVoiceEnabled === null ? true : storedVoiceEnabled === "1";
+  speechEnabled = shouldEnableVoice;
+  elements.voiceToggle.checked = speechEnabled;
+  setQuestSpeechText("");
+  elements.questVoiceControls.classList.add("hidden");
+  elements.replayVoiceBtn.disabled = true;
+  if (!isSpeechAvailable()) {
+    speechEnabled = false;
+    elements.voiceToggle.disabled = true;
+    elements.testVoiceBtn.disabled = true;
+    elements.replayVoiceBtn.disabled = true;
+    elements.stopVoiceBtn.disabled = true;
+    elements.voiceToggle.checked = false;
+  }
+
+  elements.voiceToggle.addEventListener("change", () => {
+    setSpeechEnabled(elements.voiceToggle.checked);
+  });
+  elements.testVoiceBtn.addEventListener("click", () => {
+    hasInteracted = true;
+    safeSpeak("你有開啟任務語音，接下來會念任務指示給你聽。", true);
+  });
+  elements.replayVoiceBtn.addEventListener("click", () => {
+    hasInteracted = true;
+    if (currentQuestSpeechText) {
+      safeSpeak(currentQuestSpeechText, true);
+    }
+  });
+  elements.stopVoiceBtn.addEventListener("click", stopSpeech);
+
   window.addEventListener("keydown", (e) => {
     if (document.activeElement === elements.chatInput || document.activeElement === elements.nameInput) return;
     if (elements.overlay.classList.contains("hidden") === false) return;
@@ -791,6 +909,7 @@ function wireControls() {
   elements.chatForm.addEventListener("submit", handleChatSubmit);
 
   elements.startBtn.addEventListener("click", () => {
+    hasInteracted = true;
     const inputName = elements.nameInput.value.trim() || "小探險家";
     state.player.name = inputName;
     elements.nameModal.classList.add("hidden");
@@ -872,8 +991,10 @@ function init() {
   syncWsUrl();
   renderTopBar();
   if (!state.player.name) {
+    hasInteracted = false;
     elements.nameInput.focus();
   } else {
+    hasInteracted = true;
     elements.nameModal.classList.add("hidden");
     initAfterStart();
   }

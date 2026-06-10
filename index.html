@@ -18,6 +18,13 @@
           <p class="hint">
             移動：WASD / 方向鍵　　互動：空白鍵　　聊天：輸入訊息按 Enter
           </p>
+          <div class="voice-controls">
+            <label for="voiceToggle">
+              <input id="voiceToggle" type="checkbox" checked />
+              啟用任務語音（建議開啟）
+            </label>
+            <button id="testVoiceBtn" type="button">測試語音</button>
+          </div>
         </section>
 
         <aside class="panel">
@@ -83,6 +90,10 @@
         <h3 id="overlayTitle">提示</h3>
         <p id="overlayBody"></p>
         <div id="questOptions" class="quest-options"></div>
+        <div id="questVoiceControls" class="quest-voice-controls">
+          <button id="replayVoiceBtn" type="button">重播任務語音</button>
+          <button id="stopVoiceBtn" type="button">停止語音</button>
+        </div>
         <button id="overlayClose">關閉</button>
       </div>
     </div>
