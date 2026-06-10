@@ -262,9 +262,30 @@ button:hover {
   margin-top: 10px;
 }
 
-.quest-options button,
-.shop-item button {
+.shop-item button,
+.quest-cancel {
   width: 100%;
+}
+
+.quest-option-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.quest-option-row button {
+  width: auto;
+}
+
+.quest-option-select {
+  flex: 1;
+}
+
+.quest-option-speak {
+  min-width: 42px;
+  width: 42px;
+  padding: 8px 0;
+  font-size: 1.1rem;
 }
 
 .quest-voice-controls {
@@ -281,6 +302,7 @@ button:hover {
 .quest-voice-controls button {
   background: #6ca0ff;
   width: 100%;
+  font-size: 1.2rem;
 }
 
 #stopVoiceBtn {

@@ -310,6 +310,10 @@ function speakQuestText(quest) {
   safeSpeak(`${prompt} ${options}`);
 }
 
+function speakChoiceText(opt, idx) {
+  safeSpeak(`第${idx + 1}個選項：${opt}`);
+}
+
 function setQuestSpeechText(value) {
   currentQuestSpeechText = normalizeSpeakText(value);
   if (elements.replayVoiceBtn) {
@@ -620,7 +624,11 @@ function openQuest(quest) {
   elements.replayVoiceBtn.disabled = false;
   elements.overlayOptions.innerHTML = "";
   quest.options.forEach((opt, idx) => {
+    const row = document.createElement("div");
+    row.className = "quest-option-row";
+
     const btn = document.createElement("button");
+    btn.className = "quest-option-select";
     btn.textContent = opt;
     btn.addEventListener("click", () => {
       if (!state.player) return;
@@ -653,9 +661,25 @@ function openQuest(quest) {
         closeOverlay();
       }
     });
-    elements.overlayOptions.appendChild(btn);
+
+    const speakBtn = document.createElement("button");
+    speakBtn.type = "button";
+    speakBtn.className = "quest-option-speak";
+    speakBtn.textContent = "🔊";
+    speakBtn.title = `播報「${opt}」`;
+    speakBtn.setAttribute("aria-label", `播報第${idx + 1}項選項`);
+    speakBtn.addEventListener("click", (event) => {
+      event.stopPropagation();
+      hasInteracted = true;
+      speakChoiceText(opt, idx);
+    });
+
+    row.appendChild(btn);
+    row.appendChild(speakBtn);
+    elements.overlayOptions.appendChild(row);
   });
   const cancel = document.createElement("button");
+  cancel.className = "quest-cancel";
   cancel.textContent = "稍後解答";
   cancel.addEventListener("click", closeOverlay);
   elements.overlayOptions.appendChild(cancel);
