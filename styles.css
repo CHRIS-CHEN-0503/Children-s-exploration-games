@@ -69,6 +69,23 @@ canvas {
   font-size: 0.9rem;
 }
 
+.voice-controls {
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.voice-controls label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.9rem;
+  color: #2b5f7f;
+}
+
 .wide {
   width: 100%;
 }
@@ -248,6 +265,26 @@ button:hover {
 .quest-options button,
 .shop-item button {
   width: 100%;
+}
+
+.quest-voice-controls {
+  margin-top: 10px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.quest-voice-controls.hidden {
+  display: none;
+}
+
+.quest-voice-controls button {
+  background: #6ca0ff;
+  width: 100%;
+}
+
+#stopVoiceBtn {
+  background: #ff9a4d;
 }
 
 input[type="text"] {
