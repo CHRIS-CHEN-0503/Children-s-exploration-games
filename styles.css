@@ -1,0 +1,275 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+:root {
+  --bg: #f7fbff;
+  --card: #ffffff;
+  --ink: #214f6e;
+  --accent: #ff8c42;
+  --good: #28a745;
+  --bad: #e55353;
+  --line: #d7e7f4;
+  font-family: "Comic Sans MS", "Marker Felt", "幼圆", "Microsoft JhengHei", sans-serif;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+  background: radial-gradient(circle at 20% 0%, #dff3ff 0%, #f7fbff 40%, #fff6e8 100%);
+  color: var(--ink);
+}
+
+body {
+  padding: 16px;
+}
+
+#game-shell {
+  width: min(1200px, 100%);
+  margin: 0 auto;
+  display: grid;
+  gap: 12px;
+}
+
+.game-wrap {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  gap: 12px;
+}
+
+.canvas-wrap,
+.panel {
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 12px;
+  box-shadow: 0 8px 24px rgba(28, 75, 116, 0.1);
+}
+
+.canvas-wrap h1 {
+  margin: 0 0 8px;
+  font-size: 1.2rem;
+}
+
+canvas {
+  width: 100%;
+  max-width: 768px;
+  aspect-ratio: 3 / 2;
+  display: block;
+  border: 2px solid #b6d9f3;
+  background: #eef8ff;
+  border-radius: 8px;
+}
+
+.hint {
+  margin: 6px 0 0;
+  font-size: 0.9rem;
+}
+
+.wide {
+  width: 100%;
+}
+
+.card {
+  background: var(--card);
+  border-radius: 10px;
+  padding: 10px 12px;
+  margin-bottom: 8px;
+  border: 1px solid #deedf9;
+}
+
+.card h2 {
+  margin: 0 0 8px;
+  color: #1a4e72;
+  font-size: 1rem;
+}
+
+.coins,
+.xp {
+  font-size: 1.1rem;
+  font-weight: bold;
+  margin-top: 6px;
+}
+
+#playerName {
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+#questList,
+#inventory,
+#shop {
+  display: grid;
+  gap: 6px;
+  max-height: 260px;
+  overflow: auto;
+}
+
+.quest-item,
+.inv-item,
+.shop-item {
+  border: 1px solid #dbeafb;
+  border-radius: 8px;
+  padding: 7px;
+  background: #f9fcff;
+}
+
+.quest-item.pending {
+  border-left: 5px solid #f9a11d;
+}
+
+.quest-item.done {
+  border-left: 5px solid #28a745;
+  background: #f1fff4;
+}
+
+.tag {
+  display: inline-block;
+  padding: 1px 6px;
+  border-radius: 999px;
+  color: #fff;
+  font-size: 0.75rem;
+  margin-right: 6px;
+}
+
+.easy {
+  background: #40b34f;
+}
+.medium {
+  background: #f2a33f;
+}
+.hard {
+  background: #f24f4f;
+}
+
+.chat-log {
+  height: 190px;
+  border: 1px solid #d7ebfa;
+  border-radius: 8px;
+  padding: 8px;
+  overflow: auto;
+  background: #f8fcff;
+  display: grid;
+  gap: 6px;
+}
+
+.chat-line {
+  font-size: 0.95rem;
+  line-height: 1.35;
+}
+
+.chat-form {
+  display: flex;
+  margin-top: 8px;
+  gap: 6px;
+}
+
+#chatInput,
+#roomInput,
+#nameInput,
+#wsUrlInput {
+  flex: 1;
+  border: 1px solid #bfd1df;
+  border-radius: 8px;
+  padding: 8px;
+  font-size: 0.95rem;
+}
+
+.online {
+  margin-top: 8px;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+#saveWsBtn,
+#resetBtn {
+  padding: 8px 10px;
+}
+
+.small-note {
+  margin: 4px 0 0;
+  color: #6b7f90;
+  font-size: 0.85rem;
+}
+
+button {
+  border: 0;
+  background: #4fa9ff;
+  color: #fff;
+  font-weight: bold;
+  border-radius: 8px;
+  padding: 8px 12px;
+  cursor: pointer;
+}
+
+button:hover {
+  filter: brightness(1.05);
+}
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: rgba(13, 34, 56, 0.45);
+  z-index: 40;
+}
+
+.overlay.hidden {
+  display: none;
+}
+
+.overlay-card {
+  width: min(640px, 92vw);
+  max-width: 640px;
+  background: #fff;
+  border-radius: 14px;
+  border: 1px solid #dae8f5;
+  padding: 18px;
+  box-shadow: 0 12px 30px rgba(2, 41, 80, 0.25);
+}
+
+.overlay-card.small {
+  width: 340px;
+  text-align: center;
+}
+
+.quest-options {
+  display: grid;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.quest-options button,
+.shop-item button {
+  width: 100%;
+}
+
+input[type="text"] {
+  width: 100%;
+  margin: 6px 0 8px;
+}
+
+.muted {
+  color: #7a8b99;
+  font-size: 0.85rem;
+}
+
+.required {
+  color: #b53f3f;
+  font-weight: 700;
+}
+
+@media (max-width: 980px) {
+  .game-wrap {
+    grid-template-columns: 1fr;
+  }
+  canvas {
+    max-width: 100%;
+  }
+}

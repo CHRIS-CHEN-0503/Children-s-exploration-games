@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>小小探索家 — 城鎮任務</title>
+    <link rel="stylesheet" href="styles.css" />
+    <script>
+      // Optional: window.__GAME_WS_URL__ = "wss://your-worker.workers.dev";
+    </script>
+  </head>
+  <body>
+    <div id="game-shell">
+      <main class="game-wrap">
+        <section class="canvas-wrap">
+          <h1>小小探索家：日常生活謎題村</h1>
+          <canvas id="gameCanvas" width="768" height="512" aria-label="遊戲畫布"></canvas>
+          <p class="hint">
+            移動：WASD / 方向鍵　　互動：空白鍵　　聊天：輸入訊息按 Enter
+          </p>
+        </section>
+
+        <aside class="panel">
+          <div class="card">
+            <h2>角色</h2>
+            <div id="playerName">未命名</div>
+            <div class="coins" id="coinText">錢幣：0</div>
+            <div class="xp" id="xpText">經驗：0</div>
+          </div>
+
+          <div class="card">
+            <h2>故事進度</h2>
+            <p id="storyText">歡迎來到「幸福鎮」。完成任務，讓村莊恢復秩序。</p>
+          </div>
+
+          <div class="card">
+            <h2>任務列</h2>
+            <div id="questList"></div>
+          </div>
+
+          <div class="card">
+            <h2>背包 / 可穿戴</h2>
+            <div id="inventory"></div>
+          </div>
+        </aside>
+      </main>
+
+      <section class="panel wide">
+        <div class="card">
+          <h2>小商店（用任務獎勵/每日幣）</h2>
+          <div id="shop"></div>
+        </div>
+      </section>
+
+      <section class="panel wide">
+        <div class="card">
+          <h2>多人聊天室（全頻道）</h2>
+          <div id="chatLog" class="chat-log" aria-live="polite"></div>
+          <form id="chatForm" class="chat-form">
+            <input id="chatInput" type="text" maxlength="120" placeholder="輸入訊息（全站可見）" />
+            <button type="submit">送出</button>
+          </form>
+          <div class="online">
+            <label for="roomInput">多人房間代碼：</label>
+            <input id="roomInput" type="text" value="town-01" maxlength="20" />
+            <label for="wsUrlInput">Cloudflare WS：</label>
+            <input id="wsUrlInput" type="text" placeholder="wss://你的-worker.workers.dev" maxlength="120" />
+            <label for="modeSelect">模式：</label>
+            <select id="modeSelect">
+              <option value="single">單人</option>
+              <option value="multi">多人（CF）</option>
+            </select>
+            <button id="saveWsBtn" type="button">儲存連線網址</button>
+            <button id="resetBtn" type="button">重置進度</button>
+            <span id="onlineHint">尚未連線</span>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <div id="overlay" class="overlay hidden">
+      <div class="overlay-card">
+        <h3 id="overlayTitle">提示</h3>
+        <p id="overlayBody"></p>
+        <div id="questOptions" class="quest-options"></div>
+        <button id="overlayClose">關閉</button>
+      </div>
+    </div>
+
+    <div id="nameModal" class="overlay">
+      <div class="overlay-card small">
+        <h3>開始前請先命名</h3>
+        <p>為你的探險家取名（7～9 歲可愛版本）</p>
+        <input id="nameInput" type="text" maxlength="10" placeholder="例如：小光" />
+        <button id="startBtn">開始冒險</button>
+      </div>
+    </div>
+
+    <script src="app.js"></script>
+  </body>
+</html>
